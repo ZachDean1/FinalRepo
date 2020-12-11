@@ -1,0 +1,173 @@
+//http://localhost/PHP-REST-API-POSTMAN/bookstoredb
+ 
+ CREATE TABLE authorsTable
+(
+-> AuthorID INT NOT NULL AUTO_INCREMENT,
+-> AuthorName VARCHAR(100),
+-> PRIMARY KEY(AuthorID)
+);
+
+CREATE TABLE booksTable
+(
+-> BookID INT NOT NULL AUTO_INCREMENT,
+-> BookName VARCHAR(100) NOT NULL,
+-> AuthorID INT NOT NULL,
+-> BookPrice DECIMAL(6,2) NOT NULL,
+-> BookIsAvailable BOOLEAN,
+-> PRIMARY KEY (BookID),
+-> FOREIGN KEY (AuthorID) REFERENCES authorsTable(AuthorID)
+);
+
+CREATE TABLE bookStoreTable
+(
+-> BookStoreID INT NOT NULL AUTO_INCREMENT,
+-> Location VARCHAR(100) NOT NULL,
+-> StoreManager VARCHAR(100) NOT NULL,
+-> BookID INT NOT NULL,
+-> PRIMARY KEY (BookStoreID),
+-> FOREIGN KEY (BookID) REFERENCES booksTable(BookID)
+);
+
+INSERT INTO authorsTable (AuthorName) VALUES ('William Shakespeare') , ('Charles Dickens') , ('Mark Twain');
+
+INSERT INTO booksTable (BookName, AuthorID, BookPrice, BookIsAvailable) VALUES
+('Romeo and Juliet', 1, 9.85, 1) , ('American Notes', 2, 7.99, 1), ('The Adventures of Tom Sawyer', 3, 10.99,2);
+
+INSERT INTO bookStoreTable (BookStoreID, Location, StoreManager) VALUES
+(1 , 'Fredonia NY' , 'John Stone') , (2, 'Hamburg NY', 'Alex Dunning') , (3, 'Springville NY', ' Robert Allen'); 
+?>
+
+<?php
+ require_once('dbconfig.php');
+$bookstoredb= new Database("127.0.0.1" , "php_rest_api_db", "root". "");
+if($_SERVER["REQUEST_METHOD"]=="GET")
+{
+echo jsnon_encode($db->query("SELECT * FROM booksTable"));
+}
+else if ($_SERVER["REQUEST_METHOD"]=="POST")
+{
+http_response_code(405);
+
+if($_SERVER["REQUEST_METHOD"]=="GET")
+{
+echo jsnon_encode($db->query("SELECT * FROM booksStoreTable"));
+}
+else if ($_SERVER["REQUEST_METHOD"]=="POST")
+{
+http_response_code(405);
+}
+    class bookstore extends mysqli {
+
+
+    // single instance of self shared among all instances
+    private static $instance = null;
+
+
+    // db connection config vars
+    private $user = "user";
+    private $pass = "pass";
+    private $dbName = "bookstoreDB";
+    private $dbHost = "localhost";
+
+    //This method must be static, and must return an instance of the object if the object
+ //does not already exist.
+ public static function getInstance() {
+   if (!self::$instance instanceof self) {
+     self::$instance = new self;
+   }
+   return self::$instance;
+ }
+
+ // The clone and wakeup methods prevents external instantiation of copies of the Singleton class,
+ // thus eliminating the possibility of duplicate objects.
+ public function __clone() {
+   trigger_error('Clone is not allowed.', E_USER_ERROR);
+ }
+ public function __wakeup() {
+   trigger_error('Deserializing is not allowed.', E_USER_ERROR);
+ }
+
+// private constructor
+private function __construct() {
+    parent::__construct($this->dbHost, $this->user, $this->pass, $this->dbName);
+    if (mysqli_connect_error()) {
+        exit('Connect Error (' . mysqli_connect_errno() . ') '
+                . mysqli_connect_error());
+    }
+    parent::set_charset('utf-8');
+}
+   public function create_Author ($AuthorID, $AuthorName){
+    $AuthorID = $this->is_numeric($AuthorID);
+    $AuthorName = $this->real_escape_string($AuthorName);
+    $this->query("INSERT INTO authorsTable (AuthorID, AuthorNAme) VALUES 
+    ('" . $AuthorID . "', '" . $AuthorName . "')");
+}
+
+ public function setBookPrice ($BookPrice)
+ {
+     if(isset($_POST['update_price'])){
+//print_r($_POST['price']);
+   $this->$BookPrice=$BookPrice;
+       }  
+ }
+}
+?>
+//JSON Author File 
+[
+    {
+       "AuthorID":"1",
+	   "AuthorName":"William Shakespeare"
+    },
+   {
+       "AuthorID":"2",
+	   "AuthorName":"Charles Dickens"
+    },
+    {
+       "AuthorID":"3",
+	   "AuthorName":"Mark Twain"
+    },
+	]
+	
+//JSON books File 
+[
+    {
+       "BookID":"1",
+	   "BookName":"Romeo and Juliet",
+	   "AuthorID" : "1",
+	   "BookPrice" : "9.85",
+	   "BookIsAvailable" : "1" 
+    },
+   {
+      "BookID":"2",
+	   "BookName":"American Notes",
+	   "AuthorID" : "2",
+	   "BookPrice" : "7.99",
+	   "BookIsAvailable" : "1" 
+    },
+    {
+       "BookID":"3",
+	   "BookName":"The Adventures of Tom Sawyer",
+	   "AuthorID" : "3",
+	   "BookPrice" : "10.99",
+	   "BookIsAvailable" : "2" 
+    },
+	]
+	
+//JSON bookStore File 
+[
+    {
+       "BookstoreID":"1",
+	   "Loaction":"Fredonia NY",
+	   "StoreManager": "John Stone"
+    },
+    {
+       "BookstoreID":"2",
+	   "Loaction":"Hamburg NY",
+	   "StoreManager": "Alex Dunning"
+    },
+    {
+       "BookstoreID":"3",
+	   "Loaction":"Springville NY",
+	   "StoreManager": "Robert Allen"
+    }
+	]
